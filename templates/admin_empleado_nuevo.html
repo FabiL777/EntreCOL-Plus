@@ -1,0 +1,280 @@
+
+{% extends "base.html" %}
+
+{% block title %}Registrar empleado | EntreCOL+{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+
+    <div class="section-heading">
+        <h1>Registrar empleado</h1>
+        <p>Ingresa los datos personales y laborales del nuevo empleado.</p>
+    </div>
+
+        <form class="employee-register-form"
+            id="formNuevoEmpleado"
+            method="POST"
+            action="{{ url_for('nuevo_empleado') }}"
+            novalidate>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <h3>Información personal</h3>
+
+        
+<div class="employee-form-grid">
+
+    <label>
+        Código del empleado *
+        <input type="text"
+               name="codigo_empleado"
+               minlength="2"
+               maxlength="30"
+               pattern="[A-Za-z0-9-]{2,30}"
+               title="Utiliza entre 2 y 30 caracteres: letras, números o guiones."
+               required>
+    </label>
+
+    <label>
+        Nombre completo *
+        <input type="text"
+               name="nombre_empleado"
+               minlength="3"
+               maxlength="150"
+               pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ .'-]{3,150}"
+               title="Utiliza letras, espacios, tildes, puntos o apóstrofes."
+               required>
+    </label>
+
+    <label>
+        Documento
+        <input type="text"
+               name="documento"
+               minlength="5"
+               maxlength="15"
+               pattern="[0-9]{5,15}"
+               inputmode="numeric"
+               title="Ingresa entre 5 y 15 dígitos.">
+    </label>
+
+    <label>
+        Correo electrónico
+        <input type="email"
+               name="correo"
+               maxlength="120"
+               title="Ingresa un correo electrónico válido.">
+    </label>
+
+    <label>
+        Teléfono
+        <input type="tel"
+               name="telefono"
+               maxlength="16"
+               pattern="\+?[0-9]{7,15}"
+               title="Ingresa entre 7 y 15 dígitos, con + opcional al inicio.">
+    </label>
+
+    <label>
+        Dirección
+        <input type="text"
+               name="direccion"
+               maxlength="180"
+               pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 #.,°º/-]{1,180}"
+               title="Utiliza letras, números y símbolos habituales de direcciones.">
+    </label>
+
+    <label>
+        Fecha de nacimiento
+        <input type="date"
+               name="fecha_nacimiento">
+    </label>
+
+    <label>
+        Fecha de ingreso *
+        <input type="date"
+               name="fecha_ingreso_empresa"
+               required>
+    </label>
+
+    <label>
+        Estado del empleado *
+        <select name="estado_empleado" required>
+            <option value="" selected disabled>
+                Selecciona un estado
+            </option>
+            <option value="ACTIVO">Activo</option>
+            <option value="INACTIVO">Inactivo</option>
+        </select>
+    </label>
+
+</div>
+
+        <h3>Información laboral</h3>
+
+        <div class="employee-form-grid">
+
+            <label>
+                Cargo *
+                <select name="id_cargo" required>
+                    <option value="" selected disabled>
+                        Selecciona un cargo
+                    </option>
+
+                    {% for cargo in cargos %}
+                    <option value="{{ cargo.id_cargo }}">
+                        {{ cargo.nombre_cargo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Dependencia *
+                <select name="id_dependencia" required>
+                    <option value="" selected disabled>
+                        Selecciona una dependencia
+                    </option>
+
+                    {% for dependencia in dependencias %}
+                    <option value="{{ dependencia.id_dependencia }}">
+                        {{ dependencia.nombre_dependencia }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+        </div>
+
+        <div class="employee-form-actions">
+            <a href="{{ url_for('admin_empleados') }}"
+               class="employee-form-cancel">
+                Cancelar
+            </a>
+
+            <button type="submit">
+                Guardar empleado
+            </button>
+        </div>
+
+    </form>
+
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const formulario = document.getElementById("formNuevoEmpleado");
+
+    const mensajes = {
+        codigo_empleado:
+            "El código debe tener entre 2 y 30 caracteres. Usa solo letras, números y guiones.",
+
+        nombre_empleado:
+            "El nombre debe tener entre 3 y 150 caracteres. No se permiten números ni símbolos especiales.",
+
+        documento:
+            "El documento debe contener entre 5 y 15 números, sin puntos ni espacios.",
+
+        correo:
+            "Ingresa un correo válido, por ejemplo: usuario@ejemplo.com.",
+
+        telefono:
+            "El teléfono debe contener entre 7 y 15 números. Puedes agregar + al inicio.",
+
+        direccion:
+            "La dirección contiene caracteres no permitidos.",
+
+        fecha_nacimiento:
+            "Selecciona una fecha de nacimiento válida.",
+
+        fecha_ingreso_empresa:
+            "Selecciona una fecha de ingreso válida.",
+
+        estado_empleado:
+            "Selecciona el estado del empleado.",
+
+        id_cargo:
+            "Selecciona un cargo para el empleado.",
+
+        id_dependencia:
+            "Selecciona una dependencia para el empleado."
+    };
+
+    const campos = formulario.querySelectorAll("input, select");
+
+    function mostrarError(campo) {
+
+        if (campo.type === "hidden") return;
+
+        const contenedor = campo.closest("label");
+        if (!contenedor) return;
+
+        let error = contenedor.querySelector(".employee-field-error");
+
+        if (!error) {
+            error = document.createElement("small");
+            error.className = "employee-field-error";
+            error.setAttribute("role", "alert");
+            contenedor.appendChild(error);
+        }
+
+        let mensaje = "";
+
+        if (campo.validity.valueMissing) {
+            mensaje = "Este campo es obligatorio.";
+        } else if (!campo.validity.valid) {
+            mensaje = mensajes[campo.name] || "Verifica el valor ingresado.";
+        }
+
+        campo.classList.toggle("employee-input-invalid", Boolean(mensaje));
+        campo.setAttribute("aria-invalid", String(Boolean(mensaje)));
+
+        error.textContent = mensaje;
+
+        return !mensaje;
+    }
+
+    campos.forEach(campo => {
+
+        if (campo.type === "hidden") return;
+
+        campo.addEventListener("input", function () {
+            mostrarError(campo);
+        });
+
+        campo.addEventListener("change", function () {
+            mostrarError(campo);
+        });
+
+        campo.addEventListener("blur", function () {
+            mostrarError(campo);
+        });
+
+    });
+
+    formulario.addEventListener("submit", function (evento) {
+
+        let primerCampoInvalido = null;
+
+        campos.forEach(campo => {
+
+            if (campo.type === "hidden") return;
+
+            if (!mostrarError(campo) && !primerCampoInvalido) {
+                primerCampoInvalido = campo;
+            }
+
+        });
+
+        if (primerCampoInvalido) {
+            evento.preventDefault();
+            primerCampoInvalido.focus();
+        }
+
+    });
+
+});
+</script>
+
+{% endblock %}

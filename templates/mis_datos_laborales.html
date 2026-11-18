@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mis datos laborales | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <!-- ENCABEZADO -->
+    <header class="public-header">
+
+        <a href="{{ url_for('panel_empleado') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+            <a href="{{ url_for('panel_empleado') }}">Mi panel</a>
+            <a href="{{ url_for('catalogo_libros') }}">Libros</a>
+            <a href="{{ url_for('catalogo_peliculas') }}">Películas</a>
+        </nav>
+
+    </header>
+
+    <main class="books-main">
+
+        <section class="books-heading">
+            <h1>Mis datos laborales</h1>
+            <p>
+                Consulta la información registrada
+                en tu perfil de empleado.
+            </p>
+        </section>
+
+        <section class="user-panel-card employee-data-card">
+
+            <div class="employee-welcome">
+                <div class="employee-avatar">👤</div>
+
+                <h2>{{ empleado.nombre_empleado }}</h2>
+
+                <p>
+                    Código:
+                    <strong>{{ empleado.codigo_empleado }}</strong>
+                </p>
+
+                <span class="employee-role">
+                    {{ empleado.estado_empleado }}
+                </span>
+            </div>
+
+            <!-- INFORMACIÓN PERSONAL -->
+            <h2 class="user-options-title">
+                Información personal
+            </h2>
+
+            <div class="employee-data-grid">
+
+                <div class="employee-data-item">
+                    <strong>Documento</strong>
+                    <span>{{ empleado.documento or 'No registrado' }}</span>
+                </div>
+
+                <div class="employee-data-item">
+                    <strong>Fecha de nacimiento</strong>
+                    <span>
+                        {% if empleado.fecha_nacimiento %}
+                            {{ empleado.fecha_nacimiento.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            No registrada
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="employee-data-item">
+                    <strong>Dirección</strong>
+                    <span>{{ empleado.direccion or 'No registrada' }}</span>
+                </div>
+
+                <div class="employee-data-item">
+                    <strong>Teléfono</strong>
+                    <span>{{ empleado.telefono or 'No registrado' }}</span>
+                </div>
+
+                <div class="employee-data-item">
+                    <strong>Correo electrónico</strong>
+                    <span>{{ empleado.correo or 'No registrado' }}</span>
+                </div>
+
+            </div>
+
+            <!-- INFORMACIÓN LABORAL -->
+            <h2 class="user-options-title employee-data-subtitle">
+                Información laboral
+            </h2>
+
+            <div class="employee-data-grid">
+
+                <div class="employee-data-item">
+                    <strong>Fecha de ingreso</strong>
+                    <span>
+                        {% if empleado.fecha_ingreso_empresa %}
+                            {{ empleado.fecha_ingreso_empresa.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            No registrada
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="employee-data-item">
+                    <strong>Estado laboral</strong>
+                    <span>
+                        {{ empleado.estado_empleado or 'No registrado' }}
+                    </span>
+                </div>
+
+                <!-- CARGO ACTUAL -->
+                <div class="employee-data-item">
+                    <strong>Cargo actual</strong>
+                    <span>
+                        {% if cargo_actual %}
+                            {{ cargo_actual.nombre_cargo }}
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- DEPENDENCIA ACTUAL -->
+                <div class="employee-data-item">
+                    <strong>Dependencia</strong>
+                    <span>
+                        {% if cargo_actual %}
+                            {{ cargo_actual.nombre_dependencia }}
+                        {% else %}
+                            No registrada
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- FECHA DE INICIO DEL CARGO -->
+                <div class="employee-data-item">
+                    <strong>Fecha de inicio del cargo</strong>
+                    <span>
+                        {% if cargo_actual and cargo_actual.fecha_inicio_cargo %}
+                            {{ cargo_actual.fecha_inicio_cargo.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            No registrada
+                        {% endif %}
+                    </span>
+                </div>
+
+            </div>
+
+                <!-- SEGURIDAD SOCIAL -->
+                <h2 class="user-options-title employee-data-subtitle">
+                    Seguridad social
+                </h2>
+
+                <div class="employee-data-grid">
+
+                    <!-- EPS ACTUAL -->
+                    <div class="employee-data-item">
+                        <strong>EPS actual</strong>
+
+                        <span>
+                            {% if eps_actual %}
+                                {{ eps_actual.nombre_eps }}
+                            {% else %}
+                                No registrada
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- FECHA DE AFILIACIÓN A EPS -->
+                    <div class="employee-data-item">
+                        <strong>Fecha de inicio en EPS</strong>
+
+                        <span>
+                            {% if eps_actual and eps_actual.fecha_inicio_eps %}
+                                {{ eps_actual.fecha_inicio_eps.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                No registrada
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- ARL ACTUAL -->
+                    <div class="employee-data-item">
+                        <strong>ARL actual</strong>
+
+                        <span>
+                            {% if arl_actual %}
+                                {{ arl_actual.nombre_arl }}
+                            {% else %}
+                                No registrada
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <!-- FECHA DE AFILIACIÓN A ARL -->
+                    <div class="employee-data-item">
+                        <strong>Fecha de inicio en ARL</strong>
+
+                        <span>
+                            {% if arl_actual and arl_actual.fecha_inicio_arl %}
+                                {{ arl_actual.fecha_inicio_arl.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                No registrada
+                            {% endif %}
+                        </span>
+                    </div>
+
+                </div>
+
+            <div class="employee-data-actions">
+                <a href="{{ url_for('panel_empleado') }}"
+                   class="employee-data-back">
+                    ← Volver a mi panel
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Mis datos laborales</p>
+    </footer>
+
+</body>
+</html>

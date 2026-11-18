@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Ficha de {{ empleado.nombre_empleado }} | EntreCOL+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ficha_empleado.css') }}">
+<main class="ficha-wrap">
+  <a href="{{ url_for('admin_empleados') }}" class="ficha-volver">← Volver a Gestión de empleados</a>
+  <div class="ficha-titulo">
+    <div><p class="ficha-kicker">GESTIÓN DE EMPLEADOS / FICHA INDIVIDUAL</p>
+      <h1>{{ empleado.nombre_empleado }}</h1><p>Código: {{ empleado.codigo_empleado }}</p></div>
+    <span class="ficha-estado">{{ empleado.estado_empleado }}</span>
+  </div>
+  {% macro campo(titulo, valor) %}
+    <div class="ficha-dato"><dt>{{ titulo }}</dt><dd>{{ valor if valor is not none and valor != '' else 'No registrado' }}</dd></div>
+  {% endmacro %}
+  {% macro fecha(valor) %}{{ valor.strftime('%d/%m/%Y') if valor else 'No registrada' }}{% endmacro %}
+  <section class="ficha-panel"><h2>Información personal</h2>
+    <dl class="ficha-grid">
+      {{ campo('Documento', empleado.documento) }}
+      {{ campo('Fecha de nacimiento', fecha(empleado.fecha_nacimiento)) }}
+      {{ campo('Correo', empleado.correo) }}
+      {{ campo('Teléfono', empleado.telefono) }}
+      {{ campo('Dirección', empleado.direccion) }}
+    </dl>
+  </section>
+  <section class="ficha-panel"><h2>Información laboral actual</h2>
+    <dl class="ficha-grid">
+      {{ campo('Cargo', laboral_actual.nombre_cargo if laboral_actual else none) }}
+      {{ campo('Dependencia', laboral_actual.nombre_dependencia if laboral_actual else none) }}
+      {{ campo('Fecha de ingreso', fecha(empleado.fecha_ingreso_empresa)) }}
+      {{ campo('Estado', empleado.estado_empleado) }}
+    </dl>
+  </section>
+  <section class="ficha-panel"><h2>Seguridad social</h2>
+    <dl class="ficha-grid">
+      {{ campo('EPS vigente', eps.nombre if eps else none) }}
+      {{ campo('Fondo de pensión vigente', pension.nombre if pension else none) }}
+      {{ campo('ARL vigente', arl.nombre if arl else none) }}
+    </dl>
+  </section>
+  <section class="ficha-panel"><h2>Salario</h2>
+    <p class="ficha-destacado">
+      {% if salario_actual %}${{ "{:,.2f}".format(salario_actual.salario) }} COP
+      {% else %}Sin salario vigente registrado{% endif %}
+    </p>
+    <h3>Historial salarial</h3>
+    <div class="ficha-tabla"><table><thead><tr><th>Salario</th><th>Desde</th><th>Hasta</th></tr></thead><tbody>
+    {% for s in salarios %}
+      <tr><td>${{ "{:,.2f}".format(s.salario) }} COP</td><td>{{ fecha(s.fecha_inicio) }}</td><td>{{ fecha(s.fecha_fin) if s.fecha_fin else 'Vigente / sin cierre' }}</td></tr>
+    {% else %}<tr><td colspan="3">No hay historial salarial registrado.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <section class="ficha-panel"><h2>Historial de cargos y dependencias</h2>
+    <div class="ficha-tabla"><table><thead><tr><th>Cargo</th><th>Dependencia</th><th>Desde</th><th>Hasta</th></tr></thead><tbody>
+    {% for h in historial_laboral %}
+      <tr><td>{{ h.nombre_cargo }}</td><td>{{ h.nombre_dependencia }}</td><td>{{ fecha(h.fecha_inicio) }}</td><td>{{ fecha(h.fecha_fin) if h.fecha_fin else 'Sin cierre' }}</td></tr>
+    {% else %}<tr><td colspan="4">No hay asignaciones laborales registradas.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+  <section class="ficha-panel"><h2>Novedades de nómina</h2><p>Se muestran las 100 novedades más recientes.</p>
+    <div class="ficha-tabla"><table><thead><tr><th>Período</th><th>Tipo</th><th>Inicio</th><th>Fin</th><th>Días</th><th>Observación</th></tr></thead><tbody>
+    {% for n in novedades %}
+      <tr><td>{{ "%02d"|format(n.mes) }}/{{ n.anio }}</td><td>{{ n.nombre_tipo }}</td><td>{{ fecha(n.fecha_inicio) }}</td><td>{{ fecha(n.fecha_fin) }}</td><td>{{ n.cantidad_dias }}</td><td>{{ n.observacion or '—' }}</td></tr>
+    {% else %}<tr><td colspan="6">No hay novedades registradas para este empleado.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</main>
+{% endblock %}

@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mis solicitudes | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+        <h1>EntreCOL+</h1>
+        <p>Portal de empleados</p>
+    </header>
+
+    <nav class="public-nav">
+        <a href="{{ url_for('panel_empleado') }}">
+            Volver a mi panel
+        </a>
+    </nav>
+
+    <main class="books-main">
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                {% for categoria, mensaje in mensajes %}
+                    <div class="employee-flash employee-flash-{{ categoria }}">
+                        {{ mensaje }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="books-heading">
+            <h2>Mis solicitudes</h2>
+            <p>
+                Consulta el estado y las respuestas
+                de tus solicitudes laborales.
+            </p>
+        </div>
+
+        <section class="user-panel-card">
+
+            <h3>Crear nueva solicitud</h3>
+
+            
+                <form method="POST"
+                    action="{{ url_for('mis_solicitudes') }}"
+                    class="employee-request-form">
+
+                    <input type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}">
+
+
+                <label for="tipo_solicitud">
+                    Tipo de solicitud
+                </label>
+
+                <select id="tipo_solicitud"
+                        name="tipo_solicitud"
+                        required>
+
+                    <option value="">
+                        Selecciona una opción
+                    </option>
+
+                    <option value="VACACIONES">Vacaciones</option>
+                    <option value="PERMISO LABORAL">Permiso laboral</option>
+                    <option value="LICENCIA">Licencia</option>
+                    <option value="CERTIFICADO LABORAL">
+                        Certificado laboral
+                    </option>
+                    <option value="OTRA">Otra solicitud</option>
+
+                </select>
+
+                <label for="titulo">Título</label>
+
+                <input type="text"
+                    id="titulo"
+                    name="titulo"
+                    maxlength="150"
+                    required
+                    placeholder="Escribe el asunto de tu solicitud">
+
+                <label for="descripcion">
+                    Descripción
+                </label>
+
+                <textarea id="descripcion"
+                        name="descripcion"
+                        maxlength="5000"
+                        rows="5"
+                        required
+                        placeholder="Explica tu solicitud"></textarea>
+
+                <button type="submit">
+                    Enviar solicitud
+                </button>
+
+            </form>
+
+        </section>
+
+        <section class="user-panel-card">
+
+            {% if solicitudes %}
+
+                <div class="employee-novelties-list">
+
+                    {% for solicitud in solicitudes %}
+
+                        <article class="employee-novelty-card">
+
+                            <h3>{{ solicitud.titulo }}</h3>
+
+                            <p>
+                                <strong>Tipo:</strong>
+                                {{ solicitud.tipo_solicitud }}
+                            </p>
+
+                        
+                            <p>
+                                <strong>Estado:</strong>
+                                <span class="solicitud-estado estado-{{ solicitud.estado | lower }}">
+                                    {{ solicitud.estado | replace('_', ' ') }}
+                                </span>
+                            </p>
+
+
+                            <p>
+                                <strong>Prioridad:</strong>
+                                {{ solicitud.prioridad }}
+                            </p>
+
+                            <p>
+                                <strong>Fecha de creación:</strong>
+                                {{ solicitud.fecha_creacion.strftime('%d/%m/%Y %H:%M')
+                                   if solicitud.fecha_creacion
+                                   else 'No registrada' }}
+                            </p>
+
+                            <p>
+                                <strong>Descripción:</strong>
+                                {{ solicitud.descripcion }}
+                            </p>
+
+                            <p>
+                                <strong>Respuesta:</strong>
+                                {{ solicitud.respuesta
+                                   or 'Pendiente de respuesta' }}
+                            </p>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="employee-novelties-empty">
+                    <h3>No tienes solicitudes registradas</h3>
+                    <p>
+                        Cuando registres una solicitud,
+                        podrás consultar su estado aquí.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+</body>
+</html>

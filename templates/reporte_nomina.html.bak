@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Nómina | EntreCOL+</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reporte_nomina.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reporte_nomina_filtros.css') }}">
+</head>
+<body>
+<div class="app-container">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <h2>EntreCOL<span>+</span></h2>
+            <p>Sistema de información</p>
+        </div>
+        <nav class="sidebar-menu" aria-label="Menú principal">
+            <a class="menu-item" href="{{ url_for('inicio') }}"><span>⌂</span> Inicio</a>
+            <a class="menu-item active" href="{{ url_for('reporte_nomina') }}" aria-current="page"><span>▥</span> Reporte de nómina</a>
+        </nav>
+        <div class="sidebar-footer">EntreCOL+ © 2026</div>
+    </aside>
+
+    <div class="main-container">
+        <header class="topbar">
+            <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">☰</button>
+            <div class="topbar-title">
+                <h3>Sistema EntreCOL+</h3>
+                <p>Panel de administración · Reportes</p>
+            </div>
+            <div class="topbar-user"><span>Administrador</span><div class="user-avatar" aria-hidden="true">A</div></div>
+        </header>
+
+        <main class="main-content nomina-page">
+            <div class="nomina-page-heading">
+                <div>
+                    <h1>Reporte de Nómina</h1>
+                    <p>Información general y distribución del personal de EntreCOL+.</p>
+                </div>
+                <a href="{{ url_for('inicio') }}" class="nomina-button nomina-button-outline">Volver al panel</a>
+            </div>
+
+            <section class="nomina-summary" aria-labelledby="nomina-total-title">
+                <div class="nomina-summary-icon" aria-hidden="true">👥</div>
+                <div>
+                    <p id="nomina-total-title">Empleados en el resultado</p>
+                    <strong>{{ total_empleados }}</strong>
+                </div>
+            </section>
+
+            <section class="nomina-card" aria-labelledby="nomina-list-title">
+                <div class="nomina-section-heading">
+                    <h2 id="nomina-list-title">Listado general de empleados</h2>
+                    <p>Consulta del personal con dependencia y cargo actual.</p>
+                </div>
+                <form method="GET" action="{{ url_for('reporte_nomina') }}" class="nomina-filters">
+                    <label for="orden">Ordenar por nombre</label>
+                    <select name="orden" id="orden">
+                        <option value="asc" {% if orden == 'asc' %}selected{% endif %}>Ascendente (A-Z)</option>
+                        <option value="desc" {% if orden == 'desc' %}selected{% endif %}>Descendente (Z-A)</option>
+                    </select>
+                    <label for="dependencia">Dependencia</label>
+                    <select name="dependencia" id="dependencia">
+                        <option value="">Todas</option>
+                        {% for d in dependencias_filtro %}<option value="{{ d }}" {% if d == dependencia_seleccionada %}selected{% endif %}>{{ d }}</option>{% endfor %}
+                    </select>
+                    <label for="cargo">Cargo</label>
+                    <select name="cargo" id="cargo">
+                        <option value="">Todos</option>
+                        {% for c in cargos_filtro %}<option value="{{ c }}" {% if c == cargo_seleccionado %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                    </select>
+                    <label for="estado">Estado</label>
+                    <select name="estado" id="estado">
+                        <option value="">Todos</option>
+                        <option value="ACTIVO" {% if estado_seleccionado == 'ACTIVO' %}selected{% endif %}>Activo</option>
+                        <option value="INACTIVO" {% if estado_seleccionado == 'INACTIVO' %}selected{% endif %}>Inactivo</option>
+                    </select>
+                    <button type="submit" class="nomina-button">Aplicar filtros</button>
+                    <a href="{{ url_for('reporte_nomina') }}" class="nomina-button nomina-button-outline">Limpiar</a>
+                </form>
+                <div class="nomina-table-scroll">
+                    <table class="nomina-table">
+                        <thead><tr><th scope="col">Código</th><th scope="col">Nombre completo</th><th scope="col">Dependencia</th><th scope="col">Cargo</th></tr></thead>
+                        <tbody>
+                            {% for empleado in empleados %}
+                            <tr><td>{{ empleado.codigo_empleado }}</td><td>{{ empleado.nombre_empleado }}</td><td>{{ empleado.nombre_dependencia or 'Sin asignar' }}</td><td>{{ empleado.nombre_cargo or 'Sin asignar' }}</td></tr>
+                            {% else %}
+                            <tr><td colspan="4" class="nomina-empty">No hay empleados registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="nomina-card" aria-labelledby="nomina-dep-title">
+                <div class="nomina-section-heading"><h2 id="nomina-dep-title">Empleados por dependencia</h2><p>Distribución de empleados según su dependencia actual.</p></div>
+                <div class="nomina-table-scroll">
+                    <table class="nomina-table">
+                        <thead><tr><th scope="col">Dependencia</th><th scope="col">Total de empleados</th></tr></thead>
+                        <tbody>
+                            {% for dependencia in empleados_por_dependencia %}
+                            <tr><td>{{ dependencia.nombre_dependencia }}</td><td>{{ dependencia.total_empleados }}</td></tr>
+                            {% else %}
+                            <tr><td colspan="2" class="nomina-empty">No hay información de dependencias.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="nomina-card" aria-labelledby="nomina-cargo-title">
+                <div class="nomina-section-heading"><h2 id="nomina-cargo-title">Empleados por cargo y dependencia</h2><p>Distribución de empleados según su cargo y dependencia actual.</p></div>
+                <div class="nomina-table-scroll">
+                    <table class="nomina-table">
+                        <thead><tr><th scope="col">Dependencia</th><th scope="col">Cargo</th><th scope="col">Total de empleados</th></tr></thead>
+                        <tbody>
+                            {% for registro in empleados_por_cargo %}
+                            <tr><td>{{ registro.nombre_dependencia }}</td><td>{{ registro.nombre_cargo }}</td><td>{{ registro.total_empleados }}</td></tr>
+                            {% else %}
+                            <tr><td colspan="3" class="nomina-empty">No hay información de cargos y dependencias.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="nomina-charts">
+                <section class="nomina-card" aria-labelledby="nomina-pie-title">
+                    <div class="nomina-section-heading"><h2 id="nomina-pie-title">Distribución por dependencia</h2><p>Participación de cada dependencia en el total de empleados.</p></div>
+                    <div class="nomina-chart"><canvas id="graficoDependencias" role="img" aria-label="Gráfico circular de empleados por dependencia"></canvas></div>
+                </section>
+                <section class="nomina-card" aria-labelledby="nomina-bars-title">
+                    <div class="nomina-section-heading"><h2 id="nomina-bars-title">Comparación por cargo y dependencia</h2><p>Cantidad de empleados de cada cargo en las dependencias.</p></div>
+                    <div class="nomina-chart"><canvas id="graficoCargos" role="img" aria-label="Gráfico de barras de empleados por cargo y dependencia"></canvas></div>
+                </section>
+            </div>
+        </main>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', function () {
+        const abierto = sidebar.classList.toggle('open');
+        menuToggle.setAttribute('aria-expanded', String(abierto));
+    });
+
+    const dependencias = {{ empleados_por_dependencia | tojson }};
+    const cargos = {{ empleados_por_cargo | tojson }};
+    const colores = ['#16a085', '#14253d', '#38b6a0', '#49799c', '#72c8b4', '#7286a2', '#e2ad66', '#94b5c9', '#3b9c87'];
+
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.color = '#718096';
+        Chart.defaults.borderColor = '#e5eaf0';
+
+        new Chart(document.getElementById('graficoDependencias'), {
+            type: 'pie',
+            data: {
+                labels: dependencias.map(d => d.nombre_dependencia),
+                datasets: [{
+                    data: dependencias.map(d => d.total_empleados),
+                    backgroundColor: dependencias.map((_, i) => colores[i % colores.length]),
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } },
+                    tooltip: { callbacks: { label: context => `${context.label}: ${context.parsed} empleados` } }
+                }
+            }
+        });
+
+        const nombresDependencias = [...new Set(cargos.map(c => c.nombre_dependencia))];
+        const nombresCargos = [...new Set(cargos.map(c => c.nombre_cargo))];
+        const datasets = nombresCargos.map((cargo, indice) => ({
+            label: cargo,
+            data: nombresDependencias.map(dependencia => {
+                const registro = cargos.find(c => c.nombre_dependencia === dependencia && c.nombre_cargo === cargo);
+                return registro ? registro.total_empleados : 0;
+            }),
+            backgroundColor: colores[indice % colores.length],
+            borderRadius: 5
+        }));
+
+        new Chart(document.getElementById('graficoCargos'), {
+            type: 'bar',
+            data: { labels: nombresDependencias, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { ticks: { maxRotation: 45, minRotation: 0 } },
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                },
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true } } }
+            }
+        });
+    }
+</script>
+</body>
+</html>

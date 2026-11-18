@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Reportes de novedades | EntreCOL+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes_entretenimiento.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes_pdf_botones.css') }}">
+<div class="ent-reportes">
+  <header class="ent-encabezado">
+    <span class="ent-etiqueta">REPORTES · NÓMINA</span>
+    <h1>Reportes de novedades</h1>
+    <p>Consulta novedades registradas por período, dependencia, cargo y tipo.</p>
+  </header>
+  <section class="ent-panel ent-filtros">
+    <div class="ent-panel-head"><div><h2>Filtros de consulta</h2><p>Los meses y años se aplican al período de nómina asociado a cada novedad.</p></div></div>
+    <form method="get" class="ent-formulario">
+      <div class="ent-campo"><label for="anio_inicio">Año inicial</label><input id="anio_inicio" name="anio_inicio" type="number" min="1900" max="2200" required value="{{ anio_inicio }}"></div>
+      <div class="ent-campo"><label for="mes_inicio">Mes inicial</label><select id="mes_inicio" name="mes_inicio">{% for m in range(1,13) %}<option value="{{ m }}" {% if mes_inicio == m %}selected{% endif %}>{{ '%02d'|format(m) }}</option>{% endfor %}</select></div>
+      <div class="ent-campo"><label for="anio_fin">Año final</label><input id="anio_fin" name="anio_fin" type="number" min="1900" max="2200" required value="{{ anio_fin }}"></div>
+      <div class="ent-campo"><label for="mes_fin">Mes final</label><select id="mes_fin" name="mes_fin">{% for m in range(1,13) %}<option value="{{ m }}" {% if mes_fin == m %}selected{% endif %}>{{ '%02d'|format(m) }}</option>{% endfor %}</select></div>
+      <div class="ent-campo"><label for="tipo">Tipo de novedad</label><select id="tipo" name="tipo"><option value="0">Todos los tipos</option>{% for t in tipos %}<option value="{{ t.id_tipo_novedad }}" {% if tipo == t.id_tipo_novedad %}selected{% endif %}>{{ t.nombre_tipo }}</option>{% endfor %}</select></div>
+      <div class="ent-campo"><label for="dependencia">Dependencia</label><select id="dependencia" name="dependencia"><option value="0">Todas las dependencias</option>{% for d in dependencias %}<option value="{{ d.id_dependencia }}" {% if dependencia == d.id_dependencia %}selected{% endif %}>{{ d.nombre_dependencia }}</option>{% endfor %}</select></div>
+      <div class="ent-campo"><label for="cargo">Cargo</label><select id="cargo" name="cargo"><option value="0">Todos los cargos</option>{% for c in cargos %}<option value="{{ c.id_cargo }}" {% if cargo == c.id_cargo %}selected{% endif %}>{{ c.nombre_cargo }}</option>{% endfor %}</select></div>
+      <div class="ent-acciones"><button type="submit" class="ent-boton">Aplicar filtros</button><a class="ent-boton ent-boton-secundario" href="{{ request.path }}">Limpiar filtros</a></div>
+    </form>
+    
+    <div class="entrecol-pdf-actions"
+        aria-label="Opciones de exportación PDF">
+
+        <!-- Ver PDF -->
+        <a href="{{ url_for('pdf_novedades.exportar_pdf', **request.args.to_dict()) }}"
+          class="ent-boton ent-boton-secundario"
+          target="_blank"
+          rel="noopener">
+            Ver PDF
+        </a>
+
+        <!-- Descargar PDF -->
+        <a href="{{ url_for('pdf_novedades.exportar_pdf', **dict(request.args.to_dict(), descargar=1)) }}"
+          class="ent-boton">
+            Descargar PDF
+        </a>
+
+    </div>
+
+
+  </section>
+  <section class="ent-panel">
+    <div class="ent-panel-head"><div><h2>Resumen del período</h2><p>Las novedades son registros; los empleados afectados se cuentan una sola vez.</p></div></div>
+    <div class="ent-formulario">
+      <div><span class="ent-etiqueta">NOVEDADES REGISTRADAS</span><h2>{{ resumen.total_novedades }}</h2></div>
+      <div><span class="ent-etiqueta">EMPLEADOS AFECTADOS</span><h2>{{ resumen.empleados_afectados }}</h2></div>
+      <div><span class="ent-etiqueta">SUMA DEL CAMPO CANTIDAD_DIAS</span><h2>{{ resumen.suma_cantidad_dias }}</h2></div>
+    </div>
+    <p style="margin-top:12px;color:#718096;font-size:13px">La suma de cantidad_dias es un dato técnico de los registros; no debe interpretarse como días trabajados ni como valor monetario.</p>
+  </section>
+  {% macro tabla(filas, columnas) %}
+    <div class="ent-tabla-scroll"><table class="ent-tabla"><thead><tr>{% for clave,titulo in columnas %}<th scope="col">{{ titulo }}</th>{% endfor %}</tr></thead><tbody>
+    {% for fila in filas %}<tr>{% for clave,titulo in columnas %}<td>{{ fila[clave] if fila[clave] is not none else '—' }}</td>{% endfor %}</tr>
+    {% else %}<tr><td colspan="{{ columnas|length }}" class="ent-sin-resultados">No hay registros para los filtros seleccionados.</td></tr>{% endfor %}
+    </tbody></table></div>
+  {% endmacro %}
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">01</span><h2>Novedades por dependencia</h2><p>Comparación entre registros y empleados distintos.</p></div></div><div class="ent-grafico"><canvas id="graficoDependencia"></canvas></div>{{ tabla(por_dependencia, [('etiqueta','Dependencia'),('novedades','Novedades'),('empleados','Empleados')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">02</span><h2>Novedades por cargo</h2></div></div><div class="ent-grafico"><canvas id="graficoCargo"></canvas></div>{{ tabla(por_cargo, [('etiqueta','Cargo'),('novedades','Novedades'),('empleados','Empleados')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">03</span><h2>Novedades por tipo</h2></div></div><div class="ent-grafico"><canvas id="graficoTipo"></canvas></div>{{ tabla(por_tipo, [('etiqueta','Tipo'),('novedades','Novedades'),('empleados','Empleados')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">04</span><h2>Resumen por mes y año</h2></div></div>{{ tabla(por_periodo, [('anio','Año'),('mes','Mes'),('novedades','Novedades'),('empleados','Empleados')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">05</span><h2>Detalle de novedades</h2><p>Se muestran hasta 500 registros. Los resúmenes y gráficos incluyen todos los registros filtrados.</p></div></div>{{ tabla(detalle, [('anio','Año'),('mes','Mes'),('id_novedad','ID'),('codigo_empleado','Código'),('nombre_empleado','Empleado'),('nombre_tipo','Tipo'),('dependencia','Dependencia'),('cargo','Cargo'),('fecha_inicio','Inicio'),('fecha_fin','Fin'),('cantidad_dias','Cantidad días'),('observacion','Observación')]) }}</section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const series = [
+  ['graficoDependencia', {{ grafico_dependencia|tojson }}],
+  ['graficoCargo', {{ grafico_cargo|tojson }}],
+  ['graficoTipo', {{ grafico_tipo|tojson }}]
+];
+if (typeof Chart !== 'undefined') {
+  for (const [id, filas] of series) {
+    new Chart(document.getElementById(id), {
+      type:'bar', data:{labels:filas.map(x=>x.etiqueta), datasets:[
+        {label:'Novedades',data:filas.map(x=>x.novedades),backgroundColor:'#16a085',borderRadius:5},
+        {label:'Empleados distintos',data:filas.map(x=>x.empleados),backgroundColor:'#223c59',borderRadius:5}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+    });
+  }
+}
+</script>
+{% endblock %}

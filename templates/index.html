@@ -1,0 +1,285 @@
+
+{% extends "base.html" %}
+
+{% block title %}Inicio | EntreCOL+{% endblock %}
+
+{% block content %}
+
+<!-- BIENVENIDA -->
+<section class="welcome-section">
+    <div>
+        <h1>Bienvenido a EntreCOL+</h1>
+        <p>
+            Administra y consulta la información
+            de tu sistema desde un solo lugar.
+        </p>
+    </div>
+
+
+<form action="{{ url_for('logout') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <button type="submit"
+            style="padding: 10px 18px;
+                   background-color: #dc3545;
+                   color: white;
+                   border: none;
+                   border-radius: 6px;
+                   cursor: pointer;
+                   margin: 15px 0;">
+        Cerrar sesión
+    </button>
+</form>
+
+
+    <span class="welcome-badge">Panel principal</span>
+</section>
+
+<!-- ACCESOS DIRECTOS DEL ADMINISTRADOR -->
+<section class="dashboard-section" aria-labelledby="titulo-accesos-admin">
+  <div class="section-heading"><h2 id="titulo-accesos-admin">Accesos rápidos</h2><p>Entra directamente a los módulos del sistema.</p></div>
+  <div class="admin-shortcuts-grid">
+    <a class="admin-shortcut" href="{{ url_for('admin_empleados') }}"><span class="admin-shortcut-icon" aria-hidden="true">👥</span><span class="admin-shortcut-info"><strong>Empleados</strong><small>Administrar empleados y sus datos</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('nuevo_empleado') }}"><span class="admin-shortcut-icon" aria-hidden="true">➕</span><span class="admin-shortcut-info"><strong>Nuevo empleado</strong><small>Registrar un empleado</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('administrar_solicitudes') }}"><span class="admin-shortcut-icon" aria-hidden="true">📝</span><span class="admin-shortcut-info"><strong>Solicitudes</strong><small>Revisar solicitudes de empleados</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('admin_reportes') }}"><span class="admin-shortcut-icon" aria-hidden="true">🛠️</span><span class="admin-shortcut-info"><strong>Reportes de usuarios</strong><small>Gestionar problemas reportados</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('reporte_nomina') }}"><span class="admin-shortcut-icon" aria-hidden="true">📊</span><span class="admin-shortcut-info"><strong>Nómina</strong><small>Consultar y exportar nómina</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('reportes_entretenimiento.entretenimiento') }}"><span class="admin-shortcut-icon" aria-hidden="true">🎬</span><span class="admin-shortcut-info"><strong>Entretenimiento</strong><small>Estadísticas de libros y películas</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('reportes_salud_pension.salud_pension') }}"><span class="admin-shortcut-icon" aria-hidden="true">🏥</span><span class="admin-shortcut-info"><strong>Salud y pensión</strong><small>Afiliaciones vigentes</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+    <a class="admin-shortcut" href="{{ url_for('reportes_novedades.novedades') }}"><span class="admin-shortcut-icon" aria-hidden="true">📋</span><span class="admin-shortcut-info"><strong>Novedades</strong><small>Consultar novedades laborales</small></span><span class="admin-shortcut-arrow" aria-hidden="true">›</span></a>
+  </div>
+</section>
+
+<!-- ESTADÍSTICAS GENERALES -->
+<section class="dashboard-section">
+
+    <div class="section-heading">
+        <h2>Resumen general</h2>
+        <p>Información actualizada desde MySQL</p>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <p>Empleados</p>
+                <h3>{{ estadisticas.total_empleados }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🎬</div>
+            <div class="stat-info">
+                <p>Películas</p>
+                <h3>{{ estadisticas.total_peliculas }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-info">
+                <p>Libros</p>
+                <h3>{{ estadisticas.total_libros }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✍️</div>
+            <div class="stat-info">
+                <p>Autores</p>
+                <h3>{{ estadisticas.total_autores }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🎭</div>
+            <div class="stat-info">
+                <p>Géneros</p>
+                <h3>{{ estadisticas.total_generos }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-info">
+                <p>Editoriales</p>
+                <h3>{{ estadisticas.total_editoriales }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🌐</div>
+            <div class="stat-info">
+                <p>Idiomas</p>
+                <h3>{{ estadisticas.total_idiomas }}</h3>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <p>Novedades</p>
+                <h3>{{ estadisticas.total_novedades }}</h3>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ANALÍTICAS DE LIBROS Y PELÍCULAS -->
+<section class="dashboard-section">
+
+    <div class="section-heading">
+        <h2>Analíticas del catálogo</h2>
+        <p>
+            Estadísticas de visualizaciones y favoritos
+            registradas en EntreCOL+.
+        </p>
+    </div>
+
+    <div class="analytics-grid">
+
+        <div class="analytics-card">
+            <h3>📚 Libros más vistos</h3>
+            <p>Los 10 libros con más visualizaciones.</p>
+            <div class="analytics-chart-container">
+                <canvas id="graficaLibrosVistos"></canvas>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>❤️ Libros más agregados a favoritos</h3>
+            <p>Los 10 libros más guardados por los usuarios.</p>
+            <div class="analytics-chart-container">
+                <canvas id="graficaLibrosFavoritos"></canvas>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>🎬 Películas más vistas</h3>
+            <p>Las 10 películas con más visualizaciones.</p>
+            <div class="analytics-chart-container">
+                <canvas id="graficaPeliculasVistas"></canvas>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>❤️ Películas más agregadas a favoritos</h3>
+            <p>Las 10 películas más guardadas por los usuarios.</p>
+            <div class="analytics-chart-container">
+                <canvas id="graficaPeliculasFavoritas"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<!-- Librería Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+<!-- Datos reales enviados desde Flask -->
+<script id="datos-analiticas" type="application/json">
+{{ {
+    "libros_vistos": libros_mas_vistos,
+    "libros_favoritos": libros_mas_favoritos,
+    "peliculas_vistas": peliculas_mas_vistas,
+    "peliculas_favoritas": peliculas_mas_favoritas
+} | tojson }}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const datos = JSON.parse(
+        document.getElementById("datos-analiticas").textContent
+    );
+
+    function crearGrafica(idCanvas, registros, color) {
+
+        const canvas = document.getElementById(idCanvas);
+
+        if (!canvas) return;
+
+        const etiquetas = registros.map(item => item[0]);
+        const cantidades = registros.map(item => item[1]);
+
+        new Chart(canvas, {
+            type: "bar",
+            data: {
+                labels: etiquetas,
+                datasets: [{
+                    label: "Cantidad",
+                    data: cantidades,
+                    backgroundColor: color,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: "y",
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return "Total: " + context.parsed.x;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            callback: function(value) {
+                                const titulo = this.getLabelForValue(value);
+                                return titulo.length > 22
+                                    ? titulo.substring(0, 22) + "..."
+                                    : titulo;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    crearGrafica(
+        "graficaLibrosVistos",
+        datos.libros_vistos,
+        "rgba(37, 99, 235, 0.8)"
+    );
+
+    crearGrafica(
+        "graficaLibrosFavoritos",
+        datos.libros_favoritos,
+        "rgba(220, 38, 38, 0.8)"
+    );
+
+    crearGrafica(
+        "graficaPeliculasVistas",
+        datos.peliculas_vistas,
+        "rgba(16, 185, 129, 0.8)"
+    );
+
+    crearGrafica(
+        "graficaPeliculasFavoritas",
+        datos.peliculas_favoritas,
+        "rgba(147, 51, 234, 0.8)"
+    );
+
+});
+</script>
+
+{% endblock %}

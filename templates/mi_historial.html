@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mi historial | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+
+            <a href="{{ url_for('pagina_publica') }}">
+                Inicio
+            </a>
+
+            <a href="{{ url_for('catalogo_libros') }}">
+                Libros
+            </a>
+
+            <a href="{{ url_for('catalogo_peliculas') }}">
+                Películas
+            </a>
+
+            <a href="{{ url_for('mis_favoritos') }}">
+                ♥ Mis favoritos
+            </a>
+
+            <a href="{{ url_for('panel_usuario') }}">
+                Mi panel
+            </a>
+
+        </nav>
+
+    </header>
+
+    <main class="books-main">
+
+        <section class="books-heading">
+            <h1>Mi historial</h1>
+            <p>
+                Consulta los libros y películas que has visitado.
+            </p>
+        </section>
+
+        <section class="user-panel-card">
+
+            {% if historial %}
+
+                <div class="history-list">
+
+                    {% for consulta in historial %}
+
+                        <article class="history-item">
+
+                            <div class="history-info">
+
+                                <span class="history-type">
+                                    {% if consulta.id_libro is not none %}
+                                        📚 Libro
+                                    {% else %}
+                                        🎬 Película
+                                    {% endif %}
+                                </span>
+
+                                <h3>{{ consulta.titulo }}</h3>
+
+                                <p>
+                                    Consultado el:
+                                    {{ consulta.fecha_consulta.strftime('%d/%m/%Y a las %H:%M') }}
+                                </p>
+
+                            </div>
+
+                            {% if consulta.id_libro is not none %}
+
+                                <a href="{{ url_for('detalle_libro', id_libro=consulta.id_libro) }}"
+                                   class="public-button">
+                                    Ver libro
+                                </a>
+
+                            {% else %}
+
+                                <a href="{{ url_for('detalle_pelicula', id_pelicula=consulta.id_pelicula) }}"
+                                   class="public-button">
+                                    Ver película
+                                </a>
+
+                            {% endif %}
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p>
+                    Todavía no tienes consultas registradas.
+                    Explora nuestros catálogos para comenzar.
+                </p>
+
+            {% endif %}
+
+            <a href="{{ url_for('panel_usuario') }}"
+               class="history-back-button">
+                ← Volver a mi panel
+            </a>
+
+        </section>
+
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Historial de consultas</p>
+    </footer>
+
+</body>
+</html>

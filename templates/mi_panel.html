@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Mi panel | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+
+            <a href="{{ url_for('pagina_publica') }}">
+                Inicio
+            </a>
+
+            <a href="{{ url_for('catalogo_libros') }}">
+                Libros
+            </a>
+
+            <a href="{{ url_for('catalogo_peliculas') }}">
+                Películas
+            </a>
+
+            <a href="{{ url_for('mis_favoritos') }}">
+                ♥ Mis favoritos
+            </a>
+
+        </nav>
+
+    </header>
+
+    <main class="books-main">
+
+        <section class="books-heading">
+            <h1>Mi panel</h1>
+            <p>Bienvenido a tu espacio personal en EntreCOL+.</p>
+        </section>
+
+        <section class="user-panel-card">
+
+            <h2>Información de tu cuenta</h2>
+
+            <p>
+                <strong>Usuario:</strong>
+                {{ nombre_usuario }}
+            </p>
+
+            <p>
+                <strong>Rol:</strong>
+                {{ rol }}
+            </p>
+
+
+            <h2 class="user-options-title">Mis opciones</h2>
+
+            <div class="user-panel-options">
+
+                <a href="{{ url_for('catalogo_libros') }}"
+                class="user-option-card">
+                    <span class="user-option-icon">📚</span>
+                    <span>Explorar libros</span>
+                </a>
+
+                <a href="{{ url_for('catalogo_peliculas') }}"
+                class="user-option-card">
+                    <span class="user-option-icon">🎬</span>
+                    <span>Explorar películas</span>
+                </a>
+
+                <a href="{{ url_for('mis_favoritos') }}"
+                class="user-option-card">
+                    <span class="user-option-icon">♥</span>
+                    <span>Mis favoritos</span>
+                </a>
+
+                <a href="{{ url_for('mi_historial') }}"
+                class="user-option-card">
+                    <span class="user-option-icon">🕒</span>
+                    <span>Mi historial</span>
+                </a>
+
+                <a href="{{ url_for('reportar_problema') }}"
+                class="user-option-card">
+                    <span class="user-option-icon">🛠️</span>
+                    <span>Reportar un problema</span>
+                </a>
+
+            </div>
+
+
+            <form method="POST"
+                  action="{{ url_for('logout') }}"
+                  class="user-panel-logout">
+
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <button type="submit"
+                        class="favorite-remove-button">
+                    Cerrar sesión
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Panel de usuario</p>
+    </footer>
+
+</body>
+</html>

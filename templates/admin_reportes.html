@@ -1,0 +1,131 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Reportes de usuarios | EntreCOL+
+{% endblock %}
+
+{% block content %}
+
+<div class="admin-user-reports">
+
+
+
+        <section class="books-heading">
+            <h1>Reportes de usuarios</h1>
+            <p>
+                Consulta los problemas enviados por los usuarios
+                de EntreCOL+.
+            </p>
+        </section>
+
+        <section class="user-panel-card admin-reports-card">
+
+            {% if reportes %}
+
+                <div class="admin-reports-list">
+
+                    {% for reporte in reportes %}
+
+                        <article class="admin-report-item">
+
+                            <div class="admin-report-header">
+
+                                <h2>{{ reporte.asunto }}</h2>
+
+                                <span class="admin-report-status
+                                    {% if reporte.estado == 'PENDIENTE' %}
+                                        status-pending
+                                    {% elif reporte.estado == 'EN_REVISION' %}
+                                        status-review
+                                    {% elif reporte.estado == 'RESUELTO' %}
+                                        status-resolved
+                                    {% elif reporte.estado == 'DESCARTADO' %}
+                                        status-discarded
+                                    {% endif %}">
+                                    {{ reporte.estado | replace('_', ' ') }}
+                                </span>
+
+                            </div>
+
+                            <p class="admin-report-description">
+                                {{ reporte.descripcion }}
+                            </p>
+
+                            <div class="admin-report-meta">
+
+                                <span>
+                                    <strong>Reportado por:</strong>
+                                    {{ reporte.nombre_usuario }}
+                                </span>
+
+                                <span>
+                                    <strong>Fecha:</strong>
+                                    {{ reporte.fecha_reporte.strftime('%d/%m/%Y a las %H:%M') }}
+                                </span>
+
+                                <span>
+                                    <strong>Reporte:</strong>
+                                    #{{ reporte.id_reporte }}
+                                </span>
+
+                            </div>
+
+                            <form
+                                action="{{ url_for('actualizar_estado_reporte', id_reporte=reporte.id_reporte) }}"
+                                method="POST"
+                                class="admin-report-form">
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}">
+                                <label for="estado-{{ reporte.id_reporte }}">
+                                    Cambiar estado:
+                                </label>
+                                <select
+                                    id="estado-{{ reporte.id_reporte }}"
+                                    name="estado"
+                                    required>
+                                    <option value="PENDIENTE"
+                                        {% if reporte.estado == 'PENDIENTE' %}selected{% endif %}>
+                                        Pendiente
+                                    </option>
+                                    <option value="EN_REVISION"
+                                        {% if reporte.estado == 'EN_REVISION' %}selected{% endif %}>
+                                        En revisión
+                                    </option>
+                                    <option value="RESUELTO"
+                                        {% if reporte.estado == 'RESUELTO' %}selected{% endif %}>
+                                        Resuelto
+                                    </option>
+                                    <option value="DESCARTADO"
+                                        {% if reporte.estado == 'DESCARTADO' %}selected{% endif %}>
+                                        Descartado
+                                    </option>
+                                </select>
+
+                                <button type="submit" class="admin-report-save">
+                                    Guardar cambios
+                                </button>
+
+                            </form>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p>
+                    Todavía no hay problemas reportados por los usuarios.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+</div>
+
+{% endblock %}

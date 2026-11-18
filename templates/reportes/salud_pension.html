@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Salud y pensión | EntreCOL+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes_entretenimiento.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes_pdf_botones.css') }}">
+<div class="ent-reportes">
+  <header class="ent-encabezado">
+    <span class="ent-etiqueta">REPORTES · PERSONAL</span>
+    <h1>Salud y pensión</h1>
+    <p>Afiliaciones vigentes de empleados activos. {{ total }} empleados en el resultado.</p>
+  </header>
+  <section class="ent-panel">
+    <div class="ent-panel-head"><div><h2>Filtros</h2><p>Consulta por dependencia y cargo.</p></div></div>
+    <form class="ent-formulario" method="get">
+      <div class="ent-campo"><label for="dependencia">Dependencia</label>
+        <select id="dependencia" name="dependencia"><option value="">Todas</option>
+        {% for item in dependencias %}<option value="{{ item }}" {% if dependencia == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select></div>
+      <div class="ent-campo"><label for="cargo">Cargo</label>
+        <select id="cargo" name="cargo"><option value="">Todos</option>
+        {% for item in cargos %}<option value="{{ item }}" {% if cargo == item %}selected{% endif %}>{{ item }}</option>{% endfor %}
+        </select></div>
+      <div class="ent-acciones"><button class="ent-boton" type="submit">Aplicar filtros</button>
+      <a class="ent-boton ent-boton-secundario" href="{{ request.path }}">Limpiar</a></div>
+    </form>
+
+      <div class="entrecol-pdf-actions"
+          aria-label="Opciones de exportación PDF">
+
+          <!-- Ver PDF -->
+          <a href="{{ url_for('pdf_salud_pension.exportar', **request.args.to_dict()) }}"
+            class="ent-boton ent-boton-secundario"
+            target="_blank"
+            rel="noopener">
+              Ver PDF
+          </a>
+
+          <!-- Descargar PDF -->
+          <a href="{{ url_for('pdf_salud_pension.exportar', descargar=1) }}"
+            class="ent-boton">
+              Descargar PDF
+          </a>
+
+      </div>
+
+  {% macro tabla(filas, columnas) %}
+  <div class="ent-tabla-scroll"><table class="ent-tabla"><thead><tr>
+    {% for clave, titulo in columnas %}<th scope="col">{{ titulo }}</th>{% endfor %}
+  </tr></thead><tbody>
+    {% for fila in filas %}<tr>{% for clave, titulo in columnas %}<td>{{ fila[clave] if fila[clave] is not none else '—' }}</td>{% endfor %}</tr>
+    {% else %}<tr><td class="ent-sin-resultados" colspan="{{ columnas|length }}">No hay registros para los filtros elegidos.</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% endmacro %}
+  <section class="ent-panel">
+    <div class="ent-panel-head"><div><span class="ent-numero">01</span><h2>Frecuencia por EPS</h2></div></div>
+    <div class="ent-grafico"><canvas id="graficoEPS"></canvas></div>
+    {{ tabla(frecuencia_eps, [('etiqueta','EPS'),('cantidad','Empleados')]) }}
+  </section>
+  <section class="ent-panel">
+    <div class="ent-panel-head"><div><span class="ent-numero">02</span><h2>Frecuencia por fondo de pensión</h2></div></div>
+    <div class="ent-grafico"><canvas id="graficoPension"></canvas></div>
+    {{ tabla(frecuencia_pension, [('etiqueta','Fondo'),('cantidad','Empleados')]) }}
+  </section>
+  <section class="ent-panel">
+    <div class="ent-panel-head"><div><span class="ent-numero">03</span><h2>Comparativo por dependencia</h2><p>Empleados con EPS y pensión vigente.</p></div></div>
+    <div class="ent-grafico"><canvas id="graficoDependencia"></canvas></div>
+    {{ tabla(comparativo, [('dependencia','Dependencia'),('empleados','Empleados activos'),('con_eps','Con EPS'),('con_pension','Con pensión')]) }}
+  </section>
+  <section class="ent-panel">
+    <div class="ent-panel-head"><div><span class="ent-numero">04</span><h2>Listado por cargo, EPS y pensión</h2><p>Se muestran hasta 500 registros; los gráficos incluyen todos los empleados que cumplen los filtros.</p></div></div>
+    {{ tabla(empleados, [('codigo_empleado','Código'),('nombre_empleado','Empleado'),('dependencia','Dependencia'),('cargo','Cargo'),('eps','EPS'),('pension','Pensión')]) }}
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const eps = {{ frecuencia_eps|tojson }};
+const pension = {{ frecuencia_pension|tojson }};
+const deps = {{ comparativo|tojson }};
+if (typeof Chart !== 'undefined') {
+  const opciones = {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}};
+  const barras = (id, datos, color) => new Chart(document.getElementById(id),{
+    type:'bar', data:{labels:datos.map(x=>x.etiqueta),datasets:[{label:'Empleados',data:datos.map(x=>x.cantidad),backgroundColor:color,borderRadius:5}]},options:opciones
+  });
+  barras('graficoEPS', eps, '#16a085');
+  barras('graficoPension', pension, '#223c59');
+  new Chart(document.getElementById('graficoDependencia'),{
+    type:'bar',data:{labels:deps.map(x=>x.dependencia),datasets:[
+      {label:'Con EPS',data:deps.map(x=>x.con_eps),backgroundColor:'#16a085'},
+      {label:'Con pensión',data:deps.map(x=>x.con_pension),backgroundColor:'#223c59'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+  });
+}
+</script>
+{% endblock %}

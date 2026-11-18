@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Panel de empleado | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <!-- ENCABEZADO -->
+    <header class="public-header">
+
+        <a href="{{ url_for('panel_empleado') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+            <a href="{{ url_for('panel_empleado') }}">Mi panel</a>
+            <a href="{{ url_for('catalogo_libros') }}">Libros</a>
+            <a href="{{ url_for('catalogo_peliculas') }}">Películas</a>
+        </nav>
+
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="books-main">
+
+        <section class="books-heading">
+            <h1>Panel de empleado</h1>
+            <p>
+                Consulta tus herramientas y accede
+                a las funcionalidades de EntreCOL+.
+            </p>
+        </section>
+
+        <section class="user-panel-card">
+
+            <!-- INFORMACIÓN DEL EMPLEADO -->
+            <div class="employee-welcome">
+
+                <div class="employee-avatar">👤</div>
+
+                <h2>¡Bienvenido, {{ nombre_usuario }}!</h2>
+
+                <p>
+                    Rol:
+                    <span class="employee-role">
+                        {{ rol }}
+                    </span>
+                </p>
+
+            </div>
+
+            <!-- HERRAMIENTAS -->
+            <h2 class="user-options-title">
+                Mis herramientas
+            </h2>
+
+            <div class="user-panel-options">
+
+                
+                    <a href="{{ url_for('mis_datos_laborales') }}"
+                    class="user-option-card">
+
+                        <span class="user-option-icon">💼</span>
+                        <span>Mis datos laborales</span>
+
+                    </a>
+
+                    <a href="{{ url_for('mis_novedades_laborales') }}"
+                    class="user-option-card">
+
+                        <div class="user-option-icon">
+                            📋
+                        </div>
+
+                        <h3>Mis novedades laborales</h3>
+                    </a>
+
+                    <a href="{{ url_for('mis_solicitudes') }}"
+                    class="user-option-card">
+
+                        <div class="user-option-icon">📝</div>
+
+                        <h3>Mis solicitudes</h3>
+
+                    </a>
+
+                <a href="{{ url_for('reportar_problema') }}"
+                   class="user-option-card">
+
+                    <span class="user-option-icon">🛠️</span>
+                    <span>Reportar un problema</span>
+
+                </a>
+
+            </div>
+
+            <!-- CERRAR SESIÓN -->
+            <form action="{{ url_for('logout') }}"
+                  method="POST"
+                  class="employee-logout-form">
+
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <button type="submit"
+                        class="employee-logout-button">
+                    Cerrar sesión
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="public-footer">
+        <p>EntreCOL+ | Panel de empleado</p>
+    </footer>
+
+</body>
+</html>

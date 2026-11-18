@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}EntreCOL+{% endblock %}</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accesos_admin.css') }}">
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar">
+
+            <div class="sidebar-logo">
+                <h2>EntreCOL<span>+</span></h2>
+                <p>Sistema de información</p>
+            </div>
+
+           
+            <nav class="sidebar-menu">
+
+                <a href="{{ url_for('inicio') }}" class="menu-item">
+                    <span>⌂</span> Inicio
+                </a>
+
+                <a href="{{ url_for('admin_empleados') }}" class="menu-item">
+                    <span class="menu-icon">♙</span>
+                    <span>Empleados</span>
+                </a>
+
+                <a href="{{ url_for('catalogo_libros') }}" class="menu-item">
+                    <span>▤</span> Libros
+                </a>
+
+                <a href="{{ url_for('catalogo_peliculas') }}" class="menu-item">
+                    <span>▣</span> Películas
+                </a>
+
+                <details class="sidebar-reportes">
+
+                    <summary class="menu-item">
+                        <span>▥</span>
+                        Reportes
+                        <span class="sidebar-arrow">▾</span>
+                    </summary>
+
+                    <div class="sidebar-submenu">
+
+                        <a href="{{ url_for('admin_reportes') }}"
+                        class="menu-item sidebar-submenu-item">
+                            Reportes de usuarios
+                        </a>
+
+                      
+                        <a href="{{ url_for('administrar_solicitudes') }}"
+                        class="menu-item sidebar-submenu-item">
+                            Reportes de empleados
+                        </a>
+                        <a href="{{ url_for('reporte_nomina') }}" class="menu-item sidebar-submenu-item">Nómina</a>
+                        <a href="{{ url_for('reportes_entretenimiento.entretenimiento') }}" class="menu-item sidebar-submenu-item">Entretenimiento</a>
+                        <a href="{{ url_for('reportes_salud_pension.salud_pension') }}" class="menu-item sidebar-submenu-item">Salud y pensión</a>
+                        <a href="{{ url_for('reportes_novedades.novedades') }}" class="menu-item sidebar-submenu-item">Novedades</a>
+                    </div>
+</details>
+
+
+            </nav>
+
+
+            <div class="sidebar-footer">
+                <p>EntreCOL+ © 2026</p>
+            </div>
+
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-container">
+
+            <header class="topbar">
+                <button class="menu-toggle"
+                        id="menu-toggle"
+                        type="button"
+                        aria-label="Abrir o cerrar menú">
+                    ☰
+                </button>
+
+                <div class="topbar-title">
+                    <h3>Sistema EntreCOL+</h3>
+                    <p>Panel de administración</p>
+                </div>
+
+                <div class="topbar-user">
+                    <span>Administrador</span>
+                    <div class="user-avatar">A</div>
+                </div>
+            </header>
+
+            <main class="main-content">
+
+                {% block content %}
+                {% endblock %}
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

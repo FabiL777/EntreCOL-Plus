@@ -1,0 +1,3 @@
+.entrecol-pdf-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:14px 0 20px; }
+.entrecol-pdf-actions a { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; min-height:38px; }
+.entrecol-pdf-actions a:focus-visible { outline:3px solid #16a085; outline-offset:3px; }

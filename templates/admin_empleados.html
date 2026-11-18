@@ -1,0 +1,296 @@
+
+{% extends "base.html" %}
+
+{% block title %}Empleados | EntreCOL+{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-section">
+
+    <div class="section-heading">
+        <h1>Gestión de empleados</h1>
+        <p>
+            Consulta los empleados registrados,
+            sus cargos y dependencias actuales.
+        </p>
+    </div>
+<a href="{{ url_for('nuevo_empleado') }}"
+   class="employee-register-button">
+    + Registrar empleado
+</a>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_empleados_estadisticas.css') }}">
+<div class="emp-resumen" aria-label="Resumen de empleados">
+  <div class="emp-kpi"><span>Empleados encontrados</span><strong id="empTotal">—</strong></div>
+  <div class="emp-kpi"><span>Activos</span><strong id="empActivos">—</strong></div>
+  <div class="emp-kpi"><span>Inactivos</span><strong id="empInactivos">—</strong></div>
+</div>
+<div class="emp-charts">
+  <section class="emp-chart-card"><h2>Empleados por dependencia</h2><p>Según los filtros seleccionados</p><div class="emp-canvas-wrap"><canvas id="empChartDependencias"></canvas></div></section>
+  <section class="emp-chart-card"><h2>Empleados por cargo</h2><p>Según los filtros seleccionados</p><div class="emp-canvas-wrap"><canvas id="empChartCargos"></canvas></div></section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- BÚSQUEDA Y FILTROS DE EMPLEADOS -->
+<div class="admin-employees-filters">
+
+    <input
+        type="search"
+        id="buscarEmpleado"
+        placeholder="Buscar por nombre, código o documento..."
+        aria-label="Buscar empleado"
+    >
+
+    <select id="filtrarCargo" aria-label="Filtrar por cargo">
+        <option value="">Todos los cargos</option>
+    </select>
+
+    <select id="filtrarDependencia" aria-label="Filtrar por dependencia">
+        <option value="">Todas las dependencias</option>
+    </select>
+
+    <select id="filtrarEstado" aria-label="Filtrar por estado">
+        <option value="">Todos los estados</option>
+    </select>
+
+    <button type="button" id="limpiarFiltros">
+        Limpiar filtros
+    </button>
+
+</div>
+
+<p id="resultadoEmpleados" class="admin-employees-results" aria-live="polite"></p>
+
+    <div class="admin-employees-table-container">
+
+        <table class="admin-employees-table">
+
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Empleado</th>
+                    <th>Documento</th>
+                    <th>Cargo actual</th>
+                    <th>Dependencia</th>
+                    <th>Estado</th>
+                    <th>Fecha de ingreso</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for empleado in empleados %}
+
+                <tr>
+                    <td>{{ empleado.codigo_empleado }}</td>
+
+                    <td>
+                        <strong>
+                            {{ empleado.nombre_empleado }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ empleado.documento or 'No registrado' }}
+                    </td>
+
+                    <td>
+                        {{ empleado.cargo_actual or 'Sin asignar' }}
+                    </td>
+
+                    <td>
+                        {{ empleado.dependencia_actual or 'Sin asignar' }}
+                    </td>
+
+                    <td>
+                        <span class="employee-status">
+                            {{ empleado.estado_empleado }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if empleado.fecha_ingreso_empresa %}
+                            {{ empleado.fecha_ingreso_empresa.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            No registrada
+                        {% endif %}
+                    </td>
+
+<td>
+    <div class="emp-acciones-fila">
+      <a class="emp-ver-ficha" href="{{ url_for('ficha_empleado.ficha', codigo_empleado=empleado.codigo_empleado) }}">Ver ficha</a>
+    <form
+        action="{{ url_for('cambiar_estado_empleado', codigo_empleado=empleado.codigo_empleado) }}"
+        method="POST"
+        onsubmit="return confirm('¿Confirmas que deseas cambiar el estado de este empleado?');"
+    >
+        <input type="hidden"
+               name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        {% if empleado.estado_empleado == 'ACTIVO' %}
+
+            <button type="submit"
+                    class="employee-action-button deactivate">
+                Desactivar
+            </button>
+
+        {% elif empleado.estado_empleado == 'INACTIVO' %}
+
+            <button type="submit"
+                    class="employee-action-button activate">
+                Activar
+            </button>
+
+        {% endif %}
+    </form>
+    </div>
+        </td>
+
+                        </tr>
+
+                        {% else %}
+
+                        <tr>
+                            <td colspan="8">
+                                No hay empleados registrados.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const tabla = document.querySelector(".admin-employees-table");
+    const filas = Array.from(tabla.querySelectorAll("tbody tr"))
+        .filter(fila => fila.cells.length === 8);
+
+    const buscar = document.getElementById("buscarEmpleado");
+    const cargo = document.getElementById("filtrarCargo");
+    const dependencia = document.getElementById("filtrarDependencia");
+    const estado = document.getElementById("filtrarEstado");
+    const limpiar = document.getElementById("limpiarFiltros");
+    const resultado = document.getElementById("resultadoEmpleados");
+
+    function texto(fila, columna) {
+        return fila.cells[columna].textContent.trim();
+    }
+
+    function llenarOpciones(select, columna) {
+        const valores = [...new Set(
+            filas.map(fila => texto(fila, columna))
+                .filter(valor =>
+                    valor &&
+                    valor !== "Sin asignar"
+                )
+        )].sort((a, b) => a.localeCompare(b, "es"));
+
+        valores.forEach(valor => {
+            const opcion = document.createElement("option");
+            opcion.value = valor;
+            opcion.textContent = valor;
+            select.appendChild(opcion);
+        });
+    }
+
+    llenarOpciones(cargo, 3);
+    llenarOpciones(dependencia, 4);
+    llenarOpciones(estado, 5);
+
+    function aplicarFiltros() {
+        const busqueda = buscar.value.trim().toLocaleLowerCase("es");
+        let visibles = 0;
+
+        filas.forEach(fila => {
+            const datosBusqueda = [0, 1, 2]
+                .map(columna => texto(fila, columna))
+                .join(" ")
+                .toLocaleLowerCase("es");
+
+            const coincide =
+                datosBusqueda.includes(busqueda) &&
+                (!cargo.value || texto(fila, 3) === cargo.value) &&
+                (!dependencia.value || texto(fila, 4) === dependencia.value) &&
+                (!estado.value || texto(fila, 5) === estado.value);
+
+            fila.hidden = !coincide;
+            fila.style.display = coincide ? "" : "none";
+
+            if (coincide) visibles++;
+        });
+
+        resultado.textContent =
+            `Mostrando ${visibles} de ${filas.length} empleados`;
+        actualizarEstadisticas();
+    }
+
+    let graficoDependencias = null;
+    let graficoCargos = null;
+    function contarPor(visibles, indice) {
+        const conteos = new Map();
+        visibles.forEach(fila => {
+            const valor = texto(fila, indice) || "Sin asignar";
+            conteos.set(valor, (conteos.get(valor) || 0) + 1);
+        });
+        return [...conteos.entries()].sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0], "es"));
+    }
+    function actualizarGrafico(instancia, id, entradas, color) {
+        if (typeof Chart === "undefined") return instancia;
+        const etiquetas = entradas.map(x => x[0]);
+        const valores = entradas.map(x => x[1]);
+        if (instancia) {
+            instancia.data.labels = etiquetas;
+            instancia.data.datasets[0].data = valores;
+            instancia.update();
+            return instancia;
+        }
+        return new Chart(document.getElementById(id), {
+            type: "bar",
+            data: {labels: etiquetas, datasets: [{
+                label: "Empleados", data: valores, backgroundColor: color,
+                borderRadius: 5, maxBarThickness: 44
+            }]},
+            options: {indexAxis: "y", responsive: true, maintainAspectRatio: false,
+                plugins: {legend: {display: false}},
+                scales: {x: {beginAtZero: true, ticks: {precision: 0}}}}
+        });
+    }
+    function actualizarEstadisticas() {
+        const visibles = filas.filter(fila => !fila.hidden);
+        document.getElementById("empTotal").textContent = visibles.length;
+        document.getElementById("empActivos").textContent =
+            visibles.filter(fila => texto(fila, 5) === "ACTIVO").length;
+        document.getElementById("empInactivos").textContent =
+            visibles.filter(fila => texto(fila, 5) === "INACTIVO").length;
+        graficoDependencias = actualizarGrafico(graficoDependencias,
+            "empChartDependencias", contarPor(visibles, 4), "#16a085");
+        graficoCargos = actualizarGrafico(graficoCargos,
+            "empChartCargos", contarPor(visibles, 3), "#223c59");
+    }
+
+    buscar.addEventListener("input", aplicarFiltros);
+    cargo.addEventListener("change", aplicarFiltros);
+    dependencia.addEventListener("change", aplicarFiltros);
+    estado.addEventListener("change", aplicarFiltros);
+
+    limpiar.addEventListener("click", function () {
+        buscar.value = "";
+        cargo.value = "";
+        dependencia.value = "";
+        estado.value = "";
+        aplicarFiltros();
+    });
+
+    aplicarFiltros();
+});
+</script>
+
+{% endblock %}

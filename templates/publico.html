@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>EntreCOL+ | Inicio</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="public-page">
+
+    <header class="public-header">
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        
+        <nav class="public-nav">
+
+            <a href="#inicio">Inicio</a>
+
+            {% if session.get('id_usuario') %}
+
+                <a href="{{ url_for('mis_favoritos') }}">
+                    ♥ Mis favoritos
+                </a>
+
+                <a href="{{ url_for('panel_usuario') }}">
+                    Mi panel
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">
+                    Iniciar sesión
+                </a>
+
+            {% endif %}
+
+        </nav>
+
+    </header>
+
+    <main>
+        <section id="inicio" class="public-hero">
+            <h1>Bienvenido a EntreCOL+</h1>
+
+            <p>
+                Descubre historias, explora películas
+                y encuentra tus próximos libros favoritos.
+            </p>
+        </section>
+
+        <section id="catalogos" class="public-catalogs">
+            <h2>Explora nuestros catálogos</h2>
+
+            <div class="public-catalog-grid">
+                <article class="public-catalog-card">
+                    
+                <svg width="42" height="42" viewBox="0 0 24 24"
+                    fill="none" stroke="#16a085"
+                        stroke-width="1.8" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                         <path d="M12 7v14"/>
+                        <path d="M3 18V5a2 2 0 0 1 2-2h3a4 4 0 0 1 4 4
+                          4 4 0 0 1 4-4h3a2 2 0 0 1 2 2v13
+                            h-5a4 4 0 0 0-4 3 4 4 0 0 0-4-3H3z"/>
+                </svg>
+
+                    <h3>Libros</h3>
+                    <p>
+                        Descubre títulos, autores
+                        y diferentes géneros literarios.
+                    </p>
+                  
+<a href="{{ url_for('catalogo_libros') }}"
+   class="public-catalog-link">
+    Explorar libros →
+</a>
+</article>
+
+
+                <article class="public-catalog-card">
+
+                    <svg width="42" height="42" viewBox="0 0 24 24"
+                        fill="none" stroke="#16a085"
+                       stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                         <rect x="2" y="7" width="20" height="15"
+                           rx="2"/>
+                         <path d="M2 7l2-5h16l2 5"/>
+                         <path d="M7 2l-2 5M14 2l-2 5M20 2l-2 5"/>
+                         <path d="m10 11 5 3-5 3z"/>
+                    </svg>
+
+                    <h3>Películas</h3>
+                    <p>
+                        Explora películas de diferentes
+                        épocas y géneros.
+                    </p>
+                    
+<a href="{{ url_for('catalogo_peliculas') }}"
+   class="public-catalog-link">
+    Explorar películas →
+</a>
+
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Plataforma de consulta</p>
+    </footer>
+
+</body>
+</html>

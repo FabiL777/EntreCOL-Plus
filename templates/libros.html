@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Catálogo de libros | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+            <a href="{{ url_for('pagina_publica') }}">
+                Inicio
+            </a>
+
+            <a href="{{ url_for('catalogo_libros') }}">
+                Libros
+            </a>
+
+            <a href="{{ url_for('catalogo_peliculas') }}">
+                Películas
+            </a>
+
+            
+            {% if session.get('id_usuario') %}
+
+                <a href="{{ url_for('mis_favoritos') }}">
+                    ♥ Mis favoritos
+                </a>
+
+                <a href="{{ url_for('panel_usuario') }}">
+                    Mi panel
+                </a>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">
+                    Iniciar sesión
+                </a>
+
+            {% endif %}
+
+        </nav>
+    </header>
+
+    <main class="books-main">
+
+        <!-- TÍTULO -->
+
+        <section class="books-heading">
+            <h1>Catálogo de libros</h1>
+
+            <p>
+                Descubre los libros disponibles
+                en nuestra biblioteca virtual.
+            </p>
+        </section>
+
+        <!-- BUSCADOR -->
+
+        <form method="GET"
+              action="{{ url_for('catalogo_libros') }}"
+              class="books-search">
+
+            <input
+                type="search"
+                name="q"
+                placeholder="Buscar por título o autor..."
+                value="{{ busqueda | default('') }}"
+                aria-label="Buscar libros por título o autor"
+            >
+
+            <button type="submit">
+                Buscar
+            </button>
+        </form>
+
+        {% if busqueda %}
+        <p class="books-search-result">
+            Resultados para:
+            <strong>{{ busqueda }}</strong>
+
+            <a href="{{ url_for('catalogo_libros') }}">
+                Limpiar búsqueda
+            </a>
+        </p>
+        {% endif %}
+
+        <!-- TARJETAS DE LIBROS -->
+
+        <section class="books-grid">
+
+            {% for libro in libros %}
+
+            <article class="book-card">
+
+                <a href="{{ url_for('detalle_libro', id_libro=libro.id_libro) }}"
+                class="book-card-detail-link">
+                    Ver detalles del libro →
+                </a>
+
+                <div class="book-card-icon">
+                    <svg width="36" height="36"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <path d="M12 7v14"/>
+                        <path d="M3 18V5a2 2 0 0 1 2-2h3a4 4 0 0 1 4 4
+                                 4 4 0 0 1 4-4h3a2 2 0 0 1 2 2v13
+                                 h-5a4 4 0 0 0-4 3
+                                 4 4 0 0 0-4-3H3z"/>
+                    </svg>
+                </div>
+
+                <h2>{{ libro.titulo }}</h2>
+
+                <p class="book-authors">
+                    {{ libro.autores if libro.autores else 'Autor desconocido' }}
+                </p>
+
+                <div class="book-card-details">
+                    <span>
+                        ★
+                        {{ libro.rating_promedio if libro.rating_promedio is not none else 'Sin calificación' }}
+                    </span>
+
+                    <span>
+                        {{ libro.numero_paginas if libro.numero_paginas is not none else 'N/D' }}
+                        páginas
+                    </span>
+                </div>
+
+            </article>
+
+            {% else %}
+
+            <p>No se encontraron libros.</p>
+
+            {% endfor %}
+
+        </section>
+
+        <!-- PAGINACIÓN DEBAJO DE LAS TARJETAS -->
+
+        {% if total_libros > 0 %}
+
+        <div class="books-pagination-info">
+            <p>
+                Se encontraron
+                <strong>{{ total_libros }}</strong>
+                libros.
+                Página {{ pagina }} de {{ total_paginas }}.
+            </p>
+        </div>
+
+        {% if total_paginas > 1 %}
+
+        <nav class="books-pagination"
+             aria-label="Paginación de libros">
+
+            {% if pagina > 1 %}
+                <a href="{{ url_for('catalogo_libros',
+                                   pagina=pagina-1,
+                                   q=busqueda) }}">
+                    ← Anterior
+                </a>
+            {% endif %}
+
+            {% for numero in range(
+                [1, pagina-2]|max,
+                [total_paginas, pagina+2]|min + 1
+            ) %}
+
+                <a href="{{ url_for('catalogo_libros',
+                                   pagina=numero,
+                                   q=busqueda) }}"
+                   class="{% if numero == pagina %}active{% endif %}"
+                   {% if numero == pagina %}
+                       aria-current="page"
+                   {% endif %}>
+                    {{ numero }}
+                </a>
+
+            {% endfor %}
+
+            {% if pagina < total_paginas %}
+                <a href="{{ url_for('catalogo_libros',
+                                   pagina=pagina+1,
+                                   q=busqueda) }}">
+                    Siguiente →
+                </a>
+            {% endif %}
+
+        </nav>
+
+        {% endif %}
+        {% endif %}
+
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Biblioteca virtual</p>
+    </footer>
+
+</body>
+</html>

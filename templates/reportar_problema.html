@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Reportar un problema | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+            <a href="{{ url_for('pagina_publica') }}">Inicio</a>
+            <a href="{{ url_for('catalogo_libros') }}">Libros</a>
+            <a href="{{ url_for('catalogo_peliculas') }}">Películas</a>
+            <a href="{{ url_for('mis_favoritos') }}">♥ Mis favoritos</a>
+            <a href="{{ url_for('panel_usuario') }}">Mi panel</a>
+        </nav>
+
+    </header>
+
+    <main class="books-main">
+
+        <section class="books-heading">
+            <h1>Reportar un problema</h1>
+
+            <p>
+                ¿Encontraste algún error en EntreCOL+?
+                Cuéntanos qué ocurrió para que podamos revisarlo.
+            </p>
+        </section>
+
+        <section class="user-panel-card report-card">
+
+            {% if enviado %}
+
+                <div class="report-success">
+                    <h2>✓ Reporte enviado correctamente</h2>
+                    <p>
+                        Tu reporte fue registrado y está pendiente
+                        de revisión.
+                    </p>
+                </div>
+
+                <a href="{{ url_for('panel_usuario') }}"
+                   class="history-back-button">
+                    ← Volver a mi panel
+                </a>
+
+            {% else %}
+
+                <h2>Describe el problema</h2>
+
+                <form action="{{ url_for('reportar_problema') }}"
+                      method="POST"
+                      class="report-form">
+
+                    <input type="hidden"
+                           name="csrf_token"
+                           value="{{ csrf_token() }}">
+
+                    <div class="report-field">
+                        <label for="asunto">
+                            Asunto del reporte
+                        </label>
+
+                        <input
+                            type="text"
+                            id="asunto"
+                            name="asunto"
+                            maxlength="150"
+                            placeholder="Ejemplo: No puedo agregar un libro a favoritos"
+                            required>
+                    </div>
+
+                    <div class="report-field">
+                        <label for="descripcion">
+                            Descripción del problema
+                        </label>
+
+                        <textarea
+                            id="descripcion"
+                            name="descripcion"
+                            rows="6"
+                            maxlength="3000"
+                            placeholder="Explica qué ocurrió, en qué sección y qué estabas intentando hacer."
+                            required></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="public-button report-submit">
+                        Enviar reporte
+                    </button>
+
+                </form>
+
+                <a href="{{ url_for('panel_usuario') }}"
+                   class="history-back-button">
+                    ← Cancelar y volver a mi panel
+                </a>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Reporte de problemas</p>
+    </footer>
+
+</body>
+</html>

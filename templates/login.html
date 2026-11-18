@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Iniciar sesión | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        async defer>
+    </script>
+</head>
+
+<body>
+
+        <a href="{{ url_for('pagina_publica') }}"
+        class="login-back-link">
+            ← Volver al inicio
+        </a>
+
+    <main class="login-container">
+        <section class="login-card">
+
+            <h1>EntreCOL+</h1>
+            <h2>Iniciar sesión</h2>
+
+            <p>
+                Ingresa tus datos para acceder
+                a tu cuenta.
+            </p>
+
+            <form method="POST"
+                  action="{{ url_for('login') }}">
+
+                <input type="hidden"
+                       name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <div class="login-field">
+                    <label for="nombre_usuario">
+                        Usuario
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombre_usuario"
+                        name="nombre_usuario"
+                        placeholder="Nombre de usuario"
+                        autocomplete="username"
+                        required>
+                </div>
+
+                <div class="login-field">
+                    <label for="contrasena">
+                        Contraseña
+                    </label>
+
+                    <input
+                        type="password"
+                        id="contrasena"
+                        name="contrasena"
+                        placeholder="Tu contraseña"
+                        autocomplete="current-password"
+                        required>
+                </div>
+
+                    <div
+                    class="cf-turnstile"
+                    data-sitekey="{{ turnstile_site_key }}"
+                    data-theme="dark"
+                    data-refresh-expired="auto"
+                    data-refresh-timeout="auto">
+                </div>
+
+                <button type="submit"
+                        class="login-button">
+                    Iniciar sesión
+                </button>
+
+            </form>
+
+                    <p class="login-footer">
+                ¿No tienes una cuenta?
+                <a href="{{ url_for('registro') }}">
+                    Regístrate aquí
+                </a>
+            </p>
+
+        </section>
+    </main>
+</body>
+</html>

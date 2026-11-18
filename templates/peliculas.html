@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Películas | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+
+        <nav class="public-nav">
+            <a href="{{ url_for('pagina_publica') }}">
+                Inicio
+            </a>
+
+            <a href="{{ url_for('catalogo_libros') }}">
+                Libros
+            </a>
+
+            <a href="{{ url_for('catalogo_peliculas') }}">
+                Películas
+            </a>
+
+        
+            {% if session.get('id_usuario') %}
+                <a href="{{ url_for('mis_favoritos') }}">
+                    ♥ Mis favoritos
+                </a>
+                <a href="{{ url_for('panel_usuario') }}">
+                    Mi panel
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}">
+                    Iniciar sesión
+                </a>
+            {% endif %}
+
+        </nav>
+    </header>
+
+    <main class="books-main">
+
+        <section class="books-heading">
+            <h1>Catálogo de películas</h1>
+
+            <p>
+                Descubre las películas disponibles
+                en nuestro catálogo.
+            </p>
+        </section>
+
+<!-- BUSCADOR DE PELÍCULAS -->
+
+<form method="GET"
+      action="{{ url_for('catalogo_peliculas') }}"
+      class="books-search">
+
+    <input
+        type="search"
+        name="q"
+        placeholder="Buscar por título o género..."
+        value="{{ busqueda }}"
+        aria-label="Buscar películas por título o género"
+    >
+
+    <button type="submit">
+        Buscar
+    </button>
+
+</form>
+
+{% if busqueda %}
+
+<p class="books-search-result">
+    Resultados para:
+    <strong>{{ busqueda }}</strong>
+
+    <a href="{{ url_for('catalogo_peliculas') }}">
+        Limpiar búsqueda
+    </a>
+</p>
+
+{% endif %}
+
+        <section class="books-grid">
+
+            {% for pelicula in peliculas %}
+
+            <article class="book-card">
+
+                <a href="{{ url_for('detalle_pelicula', id_pelicula=pelicula.id_pelicula) }}"
+                class="book-card-detail-link">
+                    Ver detalles de la película →
+                </a>
+
+                <div class="book-card-icon">
+                    <svg width="36" height="36"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+
+                        <rect x="2" y="7"
+                              width="20" height="15"
+                              rx="2"/>
+
+                        <path d="M2 7l2-5h16l2 5"/>
+                        <path d="M7 2l-2 5M14 2l-2 5M20 2l-2 5"/>
+                        <path d="m10 11 5 3-5 3z"/>
+                    </svg>
+                </div>
+
+                <h2>{{ pelicula.titulo }}</h2>
+
+                <p class="book-authors">
+                    Géneros:
+                    {{ pelicula.generos if pelicula.generos else 'No especificados' }}
+                </p>
+
+                <p class="book-authors">
+                    Año de lanzamiento:
+                    {{ pelicula.anio_lanzamiento
+                       if pelicula.anio_lanzamiento is not none
+                       else 'No disponible' }}
+                </p>
+
+            </article>
+
+            {% else %}
+
+            <p>No hay películas disponibles.</p>
+
+            {% endfor %}
+
+        </section>
+
+<!-- PAGINACIÓN DE PELÍCULAS -->
+
+{% if total_peliculas > 0 %}
+
+<div class="books-pagination-info">
+    <p>
+        Se encontraron
+        <strong>{{ total_peliculas }}</strong>
+        películas.
+        Página {{ pagina }} de {{ total_paginas }}.
+    </p>
+</div>
+
+{% if total_paginas > 1 %}
+
+<nav class="books-pagination"
+     aria-label="Paginación de películas">
+
+    {% if pagina > 1 %}
+        <a href="{{ url_for('catalogo_peliculas',
+                           pagina=pagina-1,
+                           q=busqueda) }}">
+            ← Anterior
+        </a>
+    {% endif %}
+
+    {% for numero in range(
+        [1, pagina-2]|max,
+        [total_paginas, pagina+2]|min + 1
+    ) %}
+
+        <a href="{{ url_for('catalogo_peliculas',
+                           pagina=numero,
+                           q=busqueda) }}"
+           class="{% if numero == pagina %}active{% endif %}"
+           {% if numero == pagina %}
+               aria-current="page"
+           {% endif %}>
+            {{ numero }}
+        </a>
+
+    {% endfor %}
+
+    {% if pagina < total_paginas %}
+        <a href="{{ url_for('catalogo_peliculas',
+                           pagina=pagina+1,
+                           q=busqueda) }}">
+            Siguiente →
+        </a>
+    {% endif %}
+
+</nav>
+
+{% endif %}
+{% endif %}
+
+    </main>
+
+    <footer class="public-footer">
+        <p>EntreCOL+ | Catálogo de películas</p>
+    </footer>
+
+</body>
+</html>

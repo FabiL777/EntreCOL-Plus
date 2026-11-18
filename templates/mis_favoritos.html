@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mis favoritos | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    
+<body class="public-page">
+
+    <header class="public-header">
+        <a href="{{ url_for('pagina_publica') }}"
+           class="public-logo">
+            EntreCOL+
+        </a>
+        <nav class="public-nav">
+            <a href="{{ url_for('pagina_publica') }}">
+                Inicio
+            </a>
+            <a href="{{ url_for('catalogo_libros') }}">
+                Libros
+            </a>
+            <a href="{{ url_for('catalogo_peliculas') }}">
+                Películas
+            </a>
+            <a href="{{ url_for('panel_usuario') }}">
+                Mi panel
+            </a>
+        </nav>
+    </header>
+    <main class="book-detail">
+
+
+        <div class="book-detail-heading">
+            <h1>Mis favoritos</h1>
+            <p>
+                Aquí encontrarás los libros y películas
+                que has guardado.
+            </p>
+        </div>
+
+        {% if favoritos %}
+
+            <div class="favorites-list">
+
+                {% for favorito in favoritos %}
+
+                    <div class="favorite-item">
+
+                        {% if favorito.id_libro %}
+
+                            <h3>📚 {{ favorito.titulo_libro }}</h3>
+
+                            <p>Libro</p>
+
+                            <a href="{{ url_for('detalle_libro', id_libro=favorito.id_libro) }}">
+                                Ver detalles del libro
+                            </a>
+
+                            <form method="POST"
+                                action="{{ url_for('quitar_libro_favorito', id_libro=favorito.id_libro) }}"
+                                class="favorite-form">
+
+                                <input type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}">
+
+                                <input type="hidden"
+                                    name="origen"
+                                    value="mis_favoritos">
+
+                                <button type="submit" class="favorite-remove-button">
+                                    Quitar de favoritos
+                                </button>
+
+                            </form>
+
+                        {% elif favorito.id_pelicula %}
+
+                            <h3>🎬 {{ favorito.titulo_pelicula }}</h3>
+
+                            <p>Película</p>
+
+                            <a href="{{ url_for('detalle_pelicula', id_pelicula=favorito.id_pelicula) }}">
+                                Ver detalles de la película
+                            </a>
+
+                            <form method="POST"
+                                action="{{ url_for('quitar_pelicula_favorita', id_pelicula=favorito.id_pelicula) }}"
+                                class="favorite-form">
+
+                                <input type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}">
+
+                                    <input type="hidden"
+                                    name="origen"
+                                    value="mis_favoritos">
+                                    
+                                <button type="submit" class="favorite-remove-button">
+                                    Quitar de favoritos
+                                </button>
+
+                            </form>
+
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="favorites-empty">
+
+                <h2>Todavía no tienes favoritos</h2>
+
+                <p>
+                    Explora nuestros catálogos y guarda
+                    los libros y películas que más te interesen.
+                </p>
+
+                <a href="{{ url_for('catalogo_libros') }}">
+                    Explorar libros
+                </a>
+
+                <a href="{{ url_for('catalogo_peliculas') }}">
+                    Explorar películas
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+</body>
+</html>

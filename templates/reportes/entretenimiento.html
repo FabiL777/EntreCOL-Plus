@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Reportes de entretenimiento | EntreCOL+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes_entretenimiento.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reportes_pdf_botones.css') }}">
+<div class="ent-reportes">
+  <header class="ent-encabezado">
+    <div><span class="ent-etiqueta">REPORTES · CATÁLOGO</span><h1>Reportes de entretenimiento</h1><p>Explora películas, libros y estadísticas con filtros personalizados.</p></div>
+  </header>
+  <section class="ent-panel ent-filtros" aria-labelledby="titulo-filtros">
+    <div class="ent-panel-head"><div><h2 id="titulo-filtros">Filtros de consulta</h2><p>Personaliza los resultados de las tablas y gráficos.</p></div></div>
+    <form method="get" class="ent-formulario">
+      <div class="ent-campo"><label for="anio_inicio">Año inicial</label><input id="anio_inicio" type="number" name="anio_inicio" value="{{ anio_inicio }}" min="1800" max="2200"></div>
+      <div class="ent-campo"><label for="anio_fin">Año final</label><input id="anio_fin" type="number" name="anio_fin" value="{{ anio_fin }}" min="1800" max="2200"></div>
+      <div class="ent-campo"><label for="genero">Género</label><select id="genero" name="genero"><option value="">Todos los géneros</option>{% for g in datos.generos %}<option value="{{ g.nombre_genero }}" {% if genero == g.nombre_genero %}selected{% endif %}>{{ g.nombre_genero }}</option>{% endfor %}</select></div>
+      <div class="ent-campo"><label for="n">Cantidad del ranking</label><input id="n" type="number" name="n" value="{{ n }}" min="1" max="100"></div>
+      <div class="ent-campo"><label for="generos_n">Número de géneros</label><input id="generos_n" type="number" name="generos_n" value="{{ generos_n }}" min="1" max="20"></div>
+      <div class="ent-campo"><label for="orden">Orden alfabético</label><select id="orden" name="orden"><option value="asc" {% if orden=='asc' %}selected{% endif %}>A–Z</option><option value="desc" {% if orden=='desc' %}selected{% endif %}>Z–A</option></select></div>
+      <div class="ent-acciones"><button type="submit" class="ent-boton">Aplicar filtros</button><a class="ent-boton ent-boton-secundario" href="{{ request.path }}">Limpiar filtros</a></div>
+    </form>
+
+      <div class="entrecol-pdf-actions"
+          aria-label="Opciones de exportación PDF">
+
+          <!-- Ver PDF -->
+          <a href="{{ url_for('pdf_entretenimiento.exportar', **request.args.to_dict()) }}"
+            class="ent-boton ent-boton-secundario"
+            target="_blank"
+            rel="noopener">
+              Ver PDF
+          </a>
+
+          <!-- Descargar PDF -->
+          <a href="{{ url_for('pdf_entretenimiento.exportar', **dict(request.args.to_dict(), descargar=1)) }}"
+            class="ent-boton">
+              Descargar PDF
+          </a>
+
+      </div>
+
+  </section>
+  {% macro tabla(filas, columnas) %}
+    <div class="ent-tabla-scroll"><table class="ent-tabla"><thead><tr>{% for clave,titulo in columnas %}<th scope="col">{{ titulo }}</th>{% endfor %}</tr></thead><tbody>{% for fila in filas %}<tr>{% for clave,titulo in columnas %}<td>{{ fila[clave] if fila[clave] is not none else '—' }}</td>{% endfor %}</tr>{% else %}<tr><td class="ent-sin-resultados" colspan="{{ columnas|length }}">No hay resultados para los filtros seleccionados.</td></tr>{% endfor %}</tbody></table></div>
+  {% endmacro %}
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">01</span><h2>Películas por género y año</h2><p>Listado según los filtros de género y período.</p></div></div>{{ tabla(datos.peliculas_fecha_genero, [('titulo','Película'),('anio_lanzamiento','Año'),('nombre_genero','Género')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">02</span><h2>Top {{ n }} libros mejor valorados</h2><p>Ranking según la valoración registrada.</p></div></div>{{ tabla(datos.top_libros, [('titulo','Libro'),('rating_promedio','Valoración'),('cantidad_ratings','Calificaciones')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">03</span><h2>Top 5 de libros por año</h2><p>Comparación de los mejor y peor valorados.</p></div></div><div class="ent-subtitulo">Mejor valorados</div>{{ tabla(datos.mejores_por_anio, [('anio','Año'),('titulo','Libro'),('rating_promedio','Valoración')]) }}<div class="ent-subtitulo ent-separacion">Menor valoración</div>{{ tabla(datos.peores_por_anio, [('anio','Año'),('titulo','Libro'),('rating_promedio','Valoración')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">04</span><h2>Películas con {{ generos_n }} géneros</h2><p>{{ datos.peliculas_n_generos|length }} resultados mostrados · máximo 200 registros.</p></div></div>{{ tabla(datos.peliculas_n_generos, [('titulo','Película'),('total_generos','Cantidad'),('generos','Géneros')]) }}</section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">05</span><h2>Películas por género</h2><p>Frecuencia de películas clasificadas por género.</p></div></div><div class="ent-grafico"><canvas id="graficoGeneros"></canvas></div></section>
+  <section class="ent-panel"><div class="ent-panel-head"><div><span class="ent-numero">06</span><h2>Libros por año</h2><p>Frecuencia de libros según su año de publicación.</p></div></div><div class="ent-grafico"><canvas id="graficoLibros"></canvas></div></section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const generos = {{ datos.frecuencia_generos|tojson }};
+const libros = {{ datos.frecuencia_libros|tojson }};
+if (typeof Chart !== 'undefined') {
+  const opciones = {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{ticks:{maxRotation:45,minRotation:0}}}};
+  new Chart(document.getElementById('graficoGeneros'), {type:'bar',data:{labels:generos.map(x=>x.etiqueta),datasets:[{label:'Películas',data:generos.map(x=>x.cantidad),backgroundColor:'#16a085',borderRadius:5}]},options:opciones});
+  new Chart(document.getElementById('graficoLibros'), {type:'bar',data:{labels:libros.map(x=>x.etiqueta),datasets:[{label:'Libros',data:libros.map(x=>x.cantidad),backgroundColor:'#223c59',borderRadius:5}]},options:opciones});
+}
+</script>
+{% endblock %}

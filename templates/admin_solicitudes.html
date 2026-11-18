@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Administrar solicitudes | EntreCOL+</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="public-page">
+
+    <header class="public-header">
+        <h1>EntreCOL+</h1>
+        <p>Panel de administración</p>
+    </header>
+
+    <main class="books-main">
+
+                {% extends "base.html" %}
+
+                {% block title %}
+                Reportes de empleados | EntreCOL+
+                {% endblock %}
+
+                {% block content %}
+
+                <div class="admin-employee-reports">
+
+        <div class="books-heading">
+            <h2>Reportes y solicitudes de empleados</h2>
+            <p>
+                Consulta y gestiona las solicitudes laborales
+                enviadas por los empleados de EntreCOL+.
+            </p>
+        </div>
+
+        <section class="user-panel-card">
+
+            {% if solicitudes %}
+
+                <div class="employee-novelties-list">
+
+                    {% for solicitud in solicitudes %}
+
+                        <article class="employee-novelty-card">
+
+                            <h3>{{ solicitud.titulo }}</h3>
+
+                            <p>
+                                <strong>Número de solicitud:</strong>
+                                {{ solicitud.id_solicitud }}
+                            </p>
+
+                            <p>
+                                <strong>Empleado:</strong>
+                                {{ solicitud.solicitante }}
+                            </p>
+
+                            <p>
+                                <strong>Tipo:</strong>
+                                {{ solicitud.tipo_solicitud }}
+                            </p>
+
+                    
+                            <p>
+                                <strong>Estado:</strong>
+                                <span class="solicitud-estado estado-{{ solicitud.estado | lower }}">
+                                    {{ solicitud.estado | replace('_', ' ') }}
+                                </span>
+                            </p>
+
+                            <p>
+                                <strong>Prioridad:</strong>
+                                {{ solicitud.prioridad }}
+                            </p>
+
+                            <p>
+                                <strong>Fecha de creación:</strong>
+                                {{ solicitud.fecha_creacion.strftime('%d/%m/%Y %H:%M')
+                                   if solicitud.fecha_creacion
+                                   else 'No registrada' }}
+                            </p>
+
+                            <p>
+                                <strong>Descripción:</strong>
+                                {{ solicitud.descripcion }}
+                            </p>
+
+                            <p>
+                                <strong>Respuesta:</strong>
+                                {{ solicitud.respuesta
+                                   or 'Pendiente de respuesta' }}
+                            </p>
+
+<hr>
+
+
+    <h4>Gestionar solicitud</h4>
+
+    <form method="POST"
+        action="{{ url_for('actualizar_solicitud', id_solicitud=solicitud.id_solicitud) }}"
+        class="employee-request-form">
+
+        <input type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}">
+
+        <!-- ESTADO -->
+        <label for="estado-{{ solicitud.id_solicitud }}">
+            Estado de la solicitud
+        </label>
+
+        <select name="estado"
+                id="estado-{{ solicitud.id_solicitud }}"
+                required>
+
+            <option value="" selected disabled>
+                Selecciona un estado
+            </option>
+
+            {% for estado in [
+                'PENDIENTE',
+                'EN_REVISION',
+                'REQUIERE_INFORMACION',
+                'RESUELTO',
+                'RECHAZADO'
+            ] %}
+
+            <option value="{{ estado }}">
+                {{ estado | replace('_', ' ') }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+        <!-- PRIORIDAD -->
+        <label for="prioridad-{{ solicitud.id_solicitud }}">
+            Prioridad
+        </label>
+
+        <select name="prioridad"
+                id="prioridad-{{ solicitud.id_solicitud }}"
+                required>
+
+            <option value="" selected disabled>
+                Selecciona una prioridad
+            </option>
+
+            {% for prioridad in ['BAJA', 'MEDIA', 'ALTA'] %}
+
+            <option value="{{ prioridad }}">
+                {{ prioridad }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+        <!-- RESPUESTA -->
+        <label for="respuesta-{{ solicitud.id_solicitud }}">
+            Respuesta al empleado
+        </label>
+
+        <textarea name="respuesta"
+                id="respuesta-{{ solicitud.id_solicitud }}"
+                rows="4"
+                maxlength="5000"
+                placeholder="Escribe una respuesta para el empleado..."></textarea>
+
+        <!-- GUARDAR -->
+        <button type="submit">
+            Guardar cambios
+        </button>
+
+    </form>
+
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="employee-novelties-empty">
+                    <h3>No hay solicitudes registradas</h3>
+                    <p>
+                        Cuando los empleados registren
+                        solicitudes, aparecerán aquí.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+</div>
+
+{% endblock %}
